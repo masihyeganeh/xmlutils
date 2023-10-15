@@ -59,7 +59,7 @@ type Utils struct {
 
 // getTypeInfo returns the typeInfo structure with details necessary
 // for marshaling and unmarshaling typ.
-func (u *Utils) getTypeInfo(typ reflect.Type) (*typeInfo, error) {
+func (u *Utils) getTypeInfo(typ reflect.Type, val reflect.Value) (*typeInfo, error) {
 	if u.Marshal {
 		if ti, ok := marshalTinfoMap.Load(typ); ok {
 			return ti.(*typeInfo), nil
@@ -82,11 +82,15 @@ func (u *Utils) getTypeInfo(typ reflect.Type) (*typeInfo, error) {
 			// For embedded structs, embed its fields.
 			if f.Anonymous {
 				t := f.Type
+				if t.Kind() == reflect.Interface {
+					val = reflect.Indirect(val.Field(i).Elem())
+					t = val.Type()
+				}
 				if t.Kind() == reflect.Ptr {
 					t = t.Elem()
 				}
 				if t.Kind() == reflect.Struct {
-					inner, err := u.getTypeInfo(t)
+					inner, err := u.getTypeInfo(t, val)
 					if err != nil {
 						return nil, err
 					}
@@ -379,6 +383,9 @@ func (finfo *fieldInfo) value(v reflect.Value) reflect.Value {
 	for i, x := range finfo.idx {
 		if i > 0 {
 			t := v.Type()
+			if t.Kind() == reflect.Interface {
+				v = reflect.Indirect(v.Elem())
+			}
 			if t.Kind() == reflect.Ptr && t.Elem().Kind() == reflect.Struct {
 				if v.IsNil() {
 					v.Set(reflect.New(v.Type().Elem()))

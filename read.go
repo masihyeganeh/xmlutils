@@ -430,7 +430,7 @@ func (d *Decoder) unmarshal(val reflect.Value, start *xml.StartElement) error {
 
 		sv = v
 		u := &Utils{}
-		tinfo, err = u.getTypeInfo(typ)
+		tinfo, err = u.getTypeInfo(typ, v)
 		if err != nil {
 			return err
 		}

@@ -463,7 +463,7 @@ func (p *printer) marshalValue(val reflect.Value, finfo *fieldInfo, startTemplat
 		Marshal: true,
 	}
 
-	tinfo, err := u.getTypeInfo(typ)
+	tinfo, err := u.getTypeInfo(typ, val)
 	if err != nil {
 		return err
 	}
